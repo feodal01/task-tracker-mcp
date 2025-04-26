@@ -134,5 +134,10 @@ async def get_task(tree_id: str, task_id: str) -> str:
         return f"Задача с ID {task_id} не найдена в дереве {tree_id}"
     return str(task)
 
+@mcp.tool()
+async def test_tool() -> str:
+    """Тестовая функция для проверки работы MCP сервера."""
+    return "Тестовая функция работает"
+
 if __name__ == "__main__":
     mcp.run(transport='stdio')

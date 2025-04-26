@@ -123,6 +123,11 @@ class TaskTree:
         with open(path, "r", encoding="utf-8") as f:
             return cls.from_json(f.read())
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "TaskTree":
+        root = Task.from_dict(data)
+        return cls(root)
+
     # ───────────────────────── красивая печать ──────────────────────── #
     def __str__(self) -> str:
         return str(self.root)
