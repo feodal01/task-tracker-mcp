@@ -35,16 +35,25 @@ pipenv install
 
 ## Running the Project
 
-### Starting the Server
+### Starting the MCP Server
 To run the MCP server, use the following command:
 ```bash
+export PYTHONPATH=src
 pipenv run python -m src.mcp_server.main
 ```
 
 ### Starting the Inspector
 To start inspecting the MCP server, use `mcpinspector`:
 ```bash
+export PYTHONPATH=src
 npx @modelcontextprotocol/inspector pipenv run python -m src.mcp_server.main
+```
+
+## Running Tests
+To run the tests, use:
+```bash
+export PYTHONPATH=src
+pytest tests/test_database.py
 ```
 
 ## Usage

@@ -1,9 +1,9 @@
 import logging
 
 from mcp.server.fastmcp import FastMCP
-from src.task_tracker.database import TaskDatabase
-from src.task_tracker.tasks import Task
-from src.task_tracker.schemas import TaskStatus
+from task_tracker.database import TaskDatabase
+from task_tracker.tasks import Task
+from task_tracker.schemas import TaskStatus
 
 MCP_SERVER_NAME = "task-tracker-mcp"
 
@@ -133,6 +133,11 @@ async def get_task(tree_id: str, task_id: str) -> str:
     if not task:
         return f"Задача с ID {task_id} не найдена в дереве {tree_id}"
     return str(task)
+
+@mcp.tool()
+async def test_tool() -> str:
+    """Тестовая функция для проверки работы MCP сервера."""
+    return "Тестовая функция работает"
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')

@@ -3,7 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 from uuid import uuid4
 
-from src.task_tracker.schemas import TaskStatus
+from task_tracker.schemas import TaskStatus
 
 
 @dataclass
