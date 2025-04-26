@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+mcp = {extras = ["cli"]}
+fastapi = "*"
+uvicorn = "*"
+motor = "*"
+pymongo = "*"
+pydantic = "*"
+python-dotenv = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
