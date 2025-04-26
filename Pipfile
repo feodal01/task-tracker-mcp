@@ -11,6 +11,8 @@ motor = "*"
 pymongo = "*"
 pydantic = "*"
 python-dotenv = "*"
+pytest = "*"
+pytest-asyncio = "*"
 
 [dev-packages]
 

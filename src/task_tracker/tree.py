@@ -2,8 +2,8 @@ from typing import Optional, List
 import json
 from datetime import datetime
 
-from src.task_tracker.tasks import Task
-from src.task_tracker.schemas import TaskStatus
+from task_tracker.tasks import Task
+from task_tracker.schemas import TaskStatus
 
 
 class TaskTree:

@@ -1,9 +1,9 @@
 import logging
 
 from mcp.server.fastmcp import FastMCP
-from src.task_tracker.database import TaskDatabase
-from src.task_tracker.tasks import Task
-from src.task_tracker.schemas import TaskStatus
+from task_tracker.database import TaskDatabase
+from task_tracker.tasks import Task
+from task_tracker.schemas import TaskStatus
 
 MCP_SERVER_NAME = "task-tracker-mcp"
 
