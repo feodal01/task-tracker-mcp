@@ -9,7 +9,10 @@ MCP_SERVER_NAME = "task-tracker-mcp"
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='mcp_server.log',
+    filemode='a'
 )
 logger = logging.getLogger(MCP_SERVER_NAME)
 
@@ -26,7 +29,9 @@ async def create_tree(name: str) -> str:
     Args:
         name: Название дерева задач
     """
+    logger.info(f'create_tree, {name}')
     tree_id = await db.create_tree(name)
+    logger.info(f'create_tree, {name} - {tree_id}')
     return f"Дерево задач '{name}' создано с ID: {tree_id}"
 
 @mcp.tool()
@@ -42,6 +47,7 @@ async def delete_tree(tree_id: str) -> str:
 @mcp.tool()
 async def list_trees() -> str:
     """Возвращает список всех деревьев задач."""
+    logger.info('list_trees')
     trees = await db.list_trees()
     if not trees:
         return "Нет доступных деревьев задач"
@@ -49,6 +55,8 @@ async def list_trees() -> str:
     result = "Доступные деревья задач:\n"
     for tree in trees:
         result += f"- {tree['name']} (ID: {tree['id']})\n"
+
+    logger.info(f'list_trees {result}')
     return result
 
 @mcp.tool()
