@@ -1,9 +1,10 @@
 import logging
 
 from mcp.server.fastmcp import FastMCP
-from task_tracker.database import TaskDatabase
-from task_tracker.tasks import Task
+
+from task_tracker.database import InMemoryDatabase
 from task_tracker.schemas import TaskStatus
+from task_tracker.tasks import Task
 
 MCP_SERVER_NAME = "task-tracker-mcp"
 
@@ -19,56 +20,17 @@ logger = logging.getLogger(MCP_SERVER_NAME)
 # Инициализируем MCP сервер
 mcp = FastMCP(MCP_SERVER_NAME)
 
-# Инициализируем базу данных
-db = TaskDatabase()
+db = InMemoryDatabase()
 
 @mcp.tool()
-async def create_tree(name: str) -> str:
-    """Создает новое дерево задач.
-    
+async def create_task(description: str, dod: str, deadline: str | None = None, assignee: str | None = None, parent_id: str | None = None) -> str:
+    """Creates a new task (or subtask) in the single task tree.
     Args:
-        name: Название дерева задач
-    """
-    logger.info(f'create_tree, {name}')
-    tree_id = await db.create_tree(name)
-    logger.info(f'create_tree, {name} - {tree_id}')
-    return f"Дерево задач '{name}' создано с ID: {tree_id}"
-
-@mcp.tool()
-async def delete_tree(tree_id: str) -> str:
-    """Удаляет дерево задач и все его задачи.
-    
-    Args:
-        tree_id: ID дерева задач
-    """
-    await db.delete_tree(tree_id)
-    return f"Дерево задач {tree_id} удалено"
-
-@mcp.tool()
-async def list_trees() -> str:
-    """Возвращает список всех деревьев задач."""
-    logger.info('list_trees')
-    trees = await db.list_trees()
-    if not trees:
-        return "Нет доступных деревьев задач"
-    
-    result = "Доступные деревья задач:\n"
-    for tree in trees:
-        result += f"- {tree['name']} (ID: {tree['id']})\n"
-
-    logger.info(f'list_trees {result}')
-    return result
-
-@mcp.tool()
-async def create_task(tree_id: str, description: str, dod: str, deadline: str | None = None, assignee: str | None = None) -> str:
-    """Создает новую задачу в указанном дереве.
-    
-    Args:
-        tree_id: ID дерева задач
-        description: Описание задачи
-        dod: Критерии приемки
-        deadline: Дедлайн (опционально)
-        assignee: Исполнитель (опционально)
+        description: Task description
+        dod: Definition of Done
+        deadline: Deadline (optional)
+        assignee: Assignee (optional)
+        parent_id: Parent task ID (if not specified, will be added to the root)
     """
     task = Task(
         description=description,
@@ -76,76 +38,71 @@ async def create_task(tree_id: str, description: str, dod: str, deadline: str | 
         deadline=deadline,
         assignee=assignee
     )
-    await db.create_task(task, tree_id)
-    return f"Задача создана с ID: {task.id}"
+    if parent_id:
+        parent = await db.get_task(parent_id)
+        if not parent:
+            return f"Parent task with ID {parent_id} not found"
+        task.parent = parent
+    await db.create_task(task)
+    return f"Task created with ID: {task.id}"
 
 @mcp.tool()
-async def update_task(tree_id: str, task_id: str, description: str | None = None, dod: str | None = None) -> str:
-    """Обновляет существующую задачу в указанном дереве.
-    
+async def update_task(task_id: str, description: str | None = None, dod: str | None = None) -> str:
+    """Updates an existing task.
     Args:
-        tree_id: ID дерева задач
-        task_id: ID задачи
-        description: Новое описание (опционально)
-        dod: Новые критерии приемки (опционально)
+        task_id: Task ID
+        description: New description (optional)
+        dod: New Definition of Done (optional)
     """
-    task = await db.get_task(task_id, tree_id)
+    task = await db.get_task(task_id)
     if not task:
-        return f"Задача с ID {task_id} не найдена в дереве {tree_id}"
-    
+        return f"Task with ID {task_id} not found"
     task.update(
         description=description,
         dod=dod
     )
-    await db.update_task(task, tree_id)
-    return f"Задача {task_id} обновлена"
+    await db.update_task(task)
+    return f"Task {task_id} updated"
 
 @mcp.tool()
-async def close_task(tree_id: str, task_id: str, status: str, reason: str | None = None) -> str:
-    """Закрывает задачу в указанном дереве.
-    
+async def close_task(task_id: str, status: str, reason: str | None = None) -> str:
+    """Closes a task.
     Args:
-        tree_id: ID дерева задач
-        task_id: ID задачи
-        status: Статус (done/cancelled)
-        reason: Причина закрытия (опционально)
+        task_id: Task ID
+        status: Status (done/cancelled)
+        reason: Close reason (optional)
     """
-    task = await db.get_task(task_id, tree_id)
+    task = await db.get_task(task_id)
     if not task:
-        return f"Задача с ID {task_id} не найдена в дереве {tree_id}"
-    
+        return f"Task with ID {task_id} not found"
     task.close(TaskStatus(status), reason)
-    await db.update_task(task, tree_id)
-    return f"Задача {task_id} закрыта"
+    await db.update_task(task)
+    return f"Task {task_id} closed"
 
 @mcp.tool()
-async def delete_task(tree_id: str, task_id: str) -> str:
-    """Удаляет задачу из указанного дерева.
-    
+async def delete_task(task_id: str) -> str:
+    """Deletes a task.
     Args:
-        tree_id: ID дерева задач
-        task_id: ID задачи
+        task_id: Task ID
     """
-    await db.delete_task(task_id, tree_id)
-    return f"Задача {task_id} удалена"
+    await db.delete_task(task_id)
+    return f"Task {task_id} deleted"
 
 @mcp.tool()
-async def get_task(tree_id: str, task_id: str) -> str:
-    """Получает информацию о задаче из указанного дерева.
-    
+async def get_task(task_id: str) -> str:
+    """Retrieves information about a task.
     Args:
-        tree_id: ID дерева задач
-        task_id: ID задачи
+        task_id: Task ID
     """
-    task = await db.get_task(task_id, tree_id)
+    task = await db.get_task(task_id)
     if not task:
-        return f"Задача с ID {task_id} не найдена в дереве {tree_id}"
+        return f"Task with ID {task_id} not found"
     return str(task)
 
 @mcp.tool()
 async def test_tool() -> str:
-    """Тестовая функция для проверки работы MCP сервера."""
-    return "Тестовая функция работает"
+    """Test function for checking MCP server health."""
+    return "Test function is working"
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')
