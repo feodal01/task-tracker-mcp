@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Optional, List
 from datetime import datetime
+from typing import Optional, List
 from uuid import uuid4
 
 from task_tracker.schemas import TaskStatus
@@ -8,6 +8,9 @@ from task_tracker.schemas import TaskStatus
 
 @dataclass
 class Task:
+    """
+    Represents a task in the task tree, supporting subtasks, status, deadlines, assignee, and serialization.
+    """
     description: str
     dod: str
     status: TaskStatus = TaskStatus.TODO
@@ -22,11 +25,32 @@ class Task:
     #  💬  Работа c деревом
     # ------------------------------------------------------------------ #
     def add_subtask(self, description: str, dod: str, deadline: datetime | None = None, assignee: str | None = None) -> 'Task':
+        """
+        Add a subtask to this task.
+
+        Args:
+            description (str): Subtask description.
+            dod (str): Definition of Done for the subtask.
+            deadline (datetime, optional): Subtask deadline.
+            assignee (str, optional): Subtask assignee.
+
+        Returns:
+            Task: The created subtask.
+        """
         child = Task(description, dod, parent=self, deadline=deadline, assignee=assignee)
         self.subtasks.append(child)
         return child
 
     def find(self, task_id: str) -> Optional['Task']:
+        """
+        Recursively search for a task by its ID in the subtree rooted at this task.
+
+        Args:
+            task_id (str): ID of the task to find.
+
+        Returns:
+            Task or None: The found task, or None if not found.
+        """
         if self.id == task_id:
             return self
         for st in self.subtasks:
@@ -40,14 +64,17 @@ class Task:
     # ------------------------------------------------------------------ #
     def close(self, status: TaskStatus, reason: str | None = None) -> None:
         """
-        Закрывает задачу (DONE / CANCELLED / …) с указанием причины.
+        Close the task (set status to DONE or CANCELLED) with an optional reason.
 
-        Пример:
-            task.close(TaskStatus.DONE, "фича задеплоена и протестирована")
-            task.close(TaskStatus.CANCELLED, "требование устарело")
+        Args:
+            status (TaskStatus): New status (must be DONE or CANCELLED).
+            reason (str, optional): Reason for closing the task.
+
+        Raises:
+            ValueError: If status is not DONE or CANCELLED.
         """
         if status not in (TaskStatus.DONE, TaskStatus.CANCELLED):
-            raise ValueError("При close разрешены только DONE или CANCELLED")
+            raise ValueError("Only DONE or CANCELLED are allowed for close")
         self.status = status
         self.close_reason = reason
 
@@ -65,15 +92,15 @@ class Task:
         subtasks: List[tuple[str, str]] | None = None,
     ) -> None:
         """
-        Обновляет параметры задачи. Все параметры опциональны.
-        
+        Update task parameters. All parameters are optional.
+
         Args:
-            description: Новое описание задачи
-            dod: Новые критерии приемки
-            status: Новый статус задачи
-            deadline: Новый дедлайн
-            assignee: Новый исполнитель
-            subtasks: Список кортежей (description, dod) для замены подзадач
+            description (str, optional): New description.
+            dod (str, optional): New Definition of Done.
+            status (TaskStatus, optional): New status.
+            deadline (datetime, optional): New deadline.
+            assignee (str, optional): New assignee.
+            subtasks (list of tuple, optional): List of (description, dod) to replace subtasks.
         """
         if description is not None:
             self.description = description
@@ -94,6 +121,12 @@ class Task:
     #  🗄  Сериализация
     # ------------------------------------------------------------------ #
     def to_dict(self) -> dict:
+        """
+        Serialize the task and its subtasks to a dictionary.
+
+        Returns:
+            dict: Dictionary representation of the task.
+        """
         return {
             "id": self.id,
             "description": self.description,
@@ -107,6 +140,16 @@ class Task:
 
     @staticmethod
     def from_dict(data: dict, parent: 'Task' = None) -> 'Task':
+        """
+        Deserialize a task (and its subtasks) from a dictionary.
+
+        Args:
+            data (dict): Dictionary with task data.
+            parent (Task, optional): Parent task.
+
+        Returns:
+            Task: The deserialized task.
+        """
         task = Task(
             description=data["description"],
             dod=data["dod"],
@@ -124,6 +167,15 @@ class Task:
     #  👁  Удобный вывод
     # ------------------------------------------------------------------ #
     def __str__(self, level: int = 0) -> str:
+        """
+        Return a pretty-printed string representation of the task and its subtasks.
+
+        Args:
+            level (int): Indentation level (used for recursion).
+
+        Returns:
+            str: Multiline string with the task tree.
+        """
         indent = "  " * level
         reason = f" • {self.close_reason}" if self.close_reason else ""
         head = f"{indent}- [{self.status.value}] {self.description} (id={self.id})"
