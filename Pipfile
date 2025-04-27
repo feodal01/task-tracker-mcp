@@ -7,12 +7,10 @@ name = "pypi"
 mcp = {extras = ["cli"]}
 fastapi = "*"
 uvicorn = "*"
-motor = "*"
-pymongo = "*"
 pydantic = "*"
-python-dotenv = "*"
 pytest = "*"
 pytest-asyncio = "*"
+black = "*"
 
 [dev-packages]
 

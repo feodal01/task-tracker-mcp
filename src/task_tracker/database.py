@@ -17,28 +17,28 @@ class BaseDatabase(ABC):
     """
 
     @abstractmethod
-    async def create_task(self, tree_id: str, parent_id: str, description: str, dod: str, **kwargs) -> str:
+    async def create_task(self, parent_id: str, description: str, dod: str, **kwargs) -> str:
         """
         Create a new task in the specified tree.
         """
         pass
 
     @abstractmethod
-    async def get_task(self, tree_id: str, task_id: str) -> Dict[str, Any]:
+    async def get_task(self, task_id: str) -> Dict[str, Any]:
         """
         Retrieve a task by its ID from the specified tree.
         """
         pass
 
     @abstractmethod
-    async def update_task(self, tree_id: str, task_id: str, task_data: Dict[str, Any]) -> None:
+    async def update_task(self, task_id: str, **kwargs) -> None:
         """
         Update a task in the specified tree.
         """
         pass
 
     @abstractmethod
-    async def delete_task(self, tree_id: str, task_id: str) -> None:
+    async def delete_task(self, task_id: str) -> None:
         """
         Delete a task from the specified tree.
         """
@@ -56,7 +56,13 @@ class InMemoryDatabase(BaseDatabase):
         root_task = Task(description="Main", dod="Root", status=TaskStatus.TODO)
         self.tree = TaskTree(root_task)
 
-    async def create_task(self, parent_id: str, description: str, dod: str, **kwargs) -> str:
+    async def create_task(
+            self,
+            parent_id: str,
+            description: str,
+            dod: str,
+            **kwargs
+    ) -> str:
         """
         Create a new subtask under the specified parent task.
 

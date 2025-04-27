@@ -81,41 +81,17 @@ class Task:
     # ------------------------------------------------------------------ #
     #  🔄  Update
     # ------------------------------------------------------------------ #
-    def update(
-        self,
-        *,
-        description: str | None = None,
-        dod: str | None = None,
-        status: TaskStatus | None = None,
-        deadline: datetime | None = None,
-        assignee: str | None = None,
-        subtasks: List[tuple[str, str]] | None = None,
-    ) -> None:
+    def update(self, **kwargs) -> None:
         """
-        Update task parameters. All parameters are optional.
+        Update task parameters dynamically. Any field present in the Task can be updated by passing it as a keyword argument.
+        Only non-None values will be set.
 
-        Args:
-            description (str, optional): New description.
-            dod (str, optional): New Definition of Done.
-            status (TaskStatus, optional): New status.
-            deadline (datetime, optional): New deadline.
-            assignee (str, optional): New assignee.
-            subtasks (list of tuple, optional): List of (description, dod) to replace subtasks.
+        Example:
+            task.update(description="New desc", status=TaskStatus.DONE)
         """
-        if description is not None:
-            self.description = description
-        if dod is not None:
-            self.dod = dod
-        if status is not None:
-            self.status = status
-        if deadline is not None:
-            self.deadline = deadline
-        if assignee is not None:
-            self.assignee = assignee
-        if subtasks is not None:
-            self.subtasks.clear()
-            for desc, dod in subtasks:
-                self.add_subtask(desc, dod)
+        for key, value in kwargs.items():
+            if hasattr(self, key) and value is not None:
+                setattr(self, key, value)
 
     # ------------------------------------------------------------------ #
     #  🗄  Сериализация
