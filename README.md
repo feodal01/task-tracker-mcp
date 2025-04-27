@@ -7,7 +7,7 @@
 Enable LLM agents to manage their tasks through a unified Task manager.
 
 ## Requirements
-- Python 3.12 or higher
+- Python 3.13 or higher
 - Node.js and npm
 
 ## Installation
