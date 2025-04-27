@@ -13,6 +13,7 @@ pydantic = "*"
 python-dotenv = "*"
 pytest = "*"
 pytest-asyncio = "*"
+black = "*"
 
 [dev-packages]
 

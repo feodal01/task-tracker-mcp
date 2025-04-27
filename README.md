@@ -7,9 +7,8 @@
 Enable LLM agents to manage their tasks through a unified Task manager.
 
 ## Requirements
-- Python 3.8 or higher
+- Python 3.12 or higher
 - Node.js and npm
-- MongoDB
 
 ## Installation
 
@@ -20,43 +19,90 @@ cd task-tracker-mcp
 ```
 
 ### Setting Up the Environment
+
+#### Using uv (Recommended)
+
+1. Install [uv](https://github.com/astral-sh/uv):
+   ```bash
+   pip install uv
+   ```
+2. Install requirements:
+   ```bash
+   uv pip install -r requirements.txt
+   ```
+
+#### Using Pipenv
 Create a virtual environment and install dependencies:
 ```bash
 pipenv install
+pipenv shell
 ```
 
-### Docker
-1. **Install Docker**: Follow the instructions on the [Docker installation page](https://docs.docker.com/get-docker/) for your operating system.
-2. **Build and run the containers**:
-   ```bash
-   docker-compose up --build
-   ```
+## Configuration
+Open the Claude Desktop configuration file located at:
+
+On macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+On Windows: %APPDATA%/Claude/claude_desktop_config.json
+Add the following:
+```json
+{
+  "mcpServers": {
+    "mcpServer": {
+      "command": "uv",
+      "args": [
+        "--directory", 
+        "/Path/to/task-tracker-mcp", 
+        "run",
+        "python",
+        "-m",
+        "mcp_server.main"
+      ],
+      "env": {
+        "PYTHONPATH": "/Path/to/task-tracker-mcp/src"
+      }
+    }
+  }
+}
+```
 
 ## Running the Project
 
 ### Starting the MCP Server
-To run the MCP server, use:
+
+**Using uv:**
 ```bash
-export PYTHONPATH=src
-pipenv run python -m src.mcp_server.main
+uv pip install -r requirements.txt
+uv python -m src.mcp_server.main
 ```
 
 ### Starting the Inspector
 To inspect the MCP server, use:
+
+**pipenv:**
 ```bash
 export PYTHONPATH=src
 npx @modelcontextprotocol/inspector pipenv run python -m src.mcp_server.main
 ```
 
+**uv:**
+```bash
+npx @modelcontextprotocol/inspector uv --directory /Path/to/task-tracker-mcp run python -m mcp_server.main 
+```
+
 ## Running Tests
-To run the tests, use:
+
+**uv:**
+```bash
+uv pip install -r requirements.txt
+export PYTHONPATH=src
+uv pytest tests/
+```
+
+**pipenv:**
 ```bash
 export PYTHONPATH=src
 pytest tests/test_database.py
 ```
-
-## Usage
-After starting the server, all commands work with tasks inside a single task tree. There is no need to specify a tree identifier — just create, update, delete, and retrieve tasks directly.
 
 ## License
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
@@ -65,4 +111,4 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 Want to contribute? Fork the repository and submit a pull request.
 
 ## Contacts
-If you have any questions, contact the author at: your_email@example.com
+If you have any questions, contact me at: evgenyorlov1991@gmail.com
