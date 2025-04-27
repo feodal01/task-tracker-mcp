@@ -1,10 +1,12 @@
 import logging
 from datetime import datetime
+from typing import Optional, Union
 
 from mcp.server.fastmcp import FastMCP
 
 from task_tracker.database import InMemoryDatabase
 from task_tracker.schemas import TaskStatus
+
 
 MCP_SERVER_NAME = "task-tracker-mcp"
 
@@ -25,32 +27,48 @@ db = InMemoryDatabase()
 @mcp.tool()
 async def create_task(
         description: str,
-        dod: str,
-        deadline: datetime | None = None,
-        assignee: str | None = None,
-        parent_id: str | None = None
+        dod: str = None,
+        deadline: str = None,
+        assignee: str = None,
+        parent_id: str = None
 ) -> str:
     """Creates a new task (or subtask) in the single task tree.
     Args:
         description: Task description
-        dod: Definition of Done
-        deadline: Deadline (optional)
+        dod: Definition of Done (optional)
+        deadline: Deadline (optional, ISO8601 string or datetime)
         assignee: Assignee (optional)
         parent_id: Parent task ID (if not specified, will be added to the root)
     """
-    parent_id = parent_id or db.tree.root.id
-    task_id = await db.create_task(parent_id, description, dod, deadline=deadline, assignee=assignee)
+    # Преобразуем deadline из строки в datetime, если нужно
+    if isinstance(deadline, str) and deadline:
+        try:
+            deadline = datetime.fromisoformat(deadline)
+        except Exception:
+            deadline = None
+    if not deadline:
+        deadline = None
+    # parent_id и assignee явно приводим к None, если пусто
+    if not parent_id:
+        parent_id = db.tree.root.id
+    if not assignee:
+        assignee = None
+    task_id = await db.create_task(
+        parent_id,
+        description,
+        dod,
+        deadline=deadline,
+        assignee=assignee
+    )
     return f"Task created with ID: {task_id}"
 
 @mcp.tool()
 async def update_task(
     task_id: str,
-    description: str | None = None,
-    dod: str | None = None,
-    status: TaskStatus | None = None,
-    close_reason: str | None = None,
-    deadline: str | None = None,
-    assignee: str | None = None,
+    description: str = None,
+    dod: str = None,
+    deadline: str = None,
+    assignee: str = None,
 ) -> str:
     """
     Updates an existing task. You can update any of the following fields:
@@ -59,8 +77,6 @@ async def update_task(
         task_id (str): ID of the task to update.
         description (str, optional): New description for the task.
         dod (str, optional): New Definition of Done for the task.
-        status (str, optional): New status for the task (todo, in_progress, done, cancelled).
-        close_reason (str, optional): Reason for closing the task (if applicable).
         deadline (str, optional): New deadline for the task.
         assignee (str, optional): New assignee for the task.
 
@@ -70,30 +86,25 @@ async def update_task(
     if not task:
         return f"Task with ID {task_id} not found"
 
-    # Преобразуем статус к Enum, если передан
-    status_enum = TaskStatus(status) if status else None
-
     await db.update_task(
         task_id,
         description=description,
         dod=dod,
-        status=status_enum,
-        close_reason=close_reason,
         deadline=deadline,
         assignee=assignee,
     )
     return f"Task {task_id} updated"
 
 @mcp.tool()
-async def close_task(
+async def update_status(
         task_id: str,
         status: str,
-        reason: str | None = None
+        reason: str = None
 ) -> str:
     """Closes a task.
     Args:
         task_id: Task ID
-        status: Status (done/cancelled)
+        status: Status (todo/done/cancelled/in_progress)
         reason: Close reason (optional)
     """
     await db.update_task(
