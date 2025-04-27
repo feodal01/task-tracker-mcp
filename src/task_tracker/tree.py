@@ -83,28 +83,14 @@ class TaskTree:
             task.close(status, reason)
 
     # ───────────────────────  🔄  update по id  ─────────────────────── #
-    def update(
-        self,
-        task_id: str,
-        *,
-        description: str | None = None,
-        dod: str | None = None,
-        status: TaskStatus | None = None,
-        deadline: datetime | None = None,
-        assignee: str | None = None,
-        subtasks: List[tuple[str, str]] | None = None,
-    ):
+    def update(self, task_id: str, **kwargs):
         """
-        Update task parameters by its ID. All parameters are optional.
+        Update task parameters by its ID. All parameters are optional and passed as keyword arguments.
+        Any field present in the Task can be updated.
 
         Args:
             task_id (str): ID of the task to update.
-            description (str, optional): New description.
-            dod (str, optional): New Definition of Done.
-            status (TaskStatus, optional): New status.
-            deadline (datetime, optional): New deadline.
-            assignee (str, optional): New assignee.
-            subtasks (list of tuple, optional): List of (description, dod) to replace subtasks.
+            **kwargs: Fields to update.
 
         Raises:
             KeyError: If the task is not found.
@@ -112,15 +98,7 @@ class TaskTree:
         task = self.get(task_id)
         if task is None:
             raise KeyError(f"Task id {task_id} not found")
-        task.update(
-            description=description,
-            dod=dod,
-            status=status,
-            deadline=deadline,
-            assignee=assignee,
-            subtasks=subtasks,
-        )
-        # Subtasks may have changed, so rebuild the index
+        task.update(**kwargs)
         self._index.clear()
         self._rebuild_index(self.root)
 
