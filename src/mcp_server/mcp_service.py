@@ -11,9 +11,9 @@ MCP_SERVER_NAME = "task-tracker-mcp"
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='mcp_server.log',
-    filemode='a'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    filename="mcp_server.log",
+    filemode="a",
 )
 logger = logging.getLogger(MCP_SERVER_NAME)
 
@@ -22,13 +22,14 @@ mcp = FastMCP(MCP_SERVER_NAME)
 
 db = InMemoryDatabase()
 
+
 @mcp.tool()
 async def create_task(
-        description: str,
-        dod: str = None,
-        deadline: str = None,
-        assignee: str = None,
-        parent_id: str = None
+    description: str,
+    dod: str = None,
+    deadline: str = None,
+    assignee: str = None,
+    parent_id: str = None,
 ) -> str:
     """Creates a new task (or subtask) in the single task tree.
     Args:
@@ -52,13 +53,10 @@ async def create_task(
     if not assignee:
         assignee = None
     task_id = await db.create_task(
-        parent_id,
-        description,
-        dod,
-        deadline=deadline,
-        assignee=assignee
+        parent_id, description, dod, deadline=deadline, assignee=assignee
     )
     return f"Task created with ID: {task_id}"
+
 
 @mcp.tool()
 async def update_task(
@@ -93,24 +91,18 @@ async def update_task(
     )
     return f"Task {task_id} updated"
 
+
 @mcp.tool()
-async def update_status(
-        task_id: str,
-        status: str,
-        reason: str = None
-) -> str:
+async def update_status(task_id: str, status: str, reason: str = None) -> str:
     """Closes a task.
     Args:
         task_id: Task ID
         status: Status (todo/done/cancelled/in_progress)
         reason: Close reason (optional)
     """
-    await db.update_task(
-        task_id,
-        status=TaskStatus(status),
-        close_reason=reason
-    )
+    await db.update_task(task_id, status=TaskStatus(status), close_reason=reason)
     return f"Task {task_id} closed"
+
 
 @mcp.tool()
 async def delete_task(task_id: str) -> str:
@@ -120,6 +112,7 @@ async def delete_task(task_id: str) -> str:
     """
     await db.delete_task(task_id)
     return f"Task {task_id} deleted"
+
 
 @mcp.tool()
 async def get_task(task_id: str) -> str:
@@ -132,15 +125,18 @@ async def get_task(task_id: str) -> str:
         return f"Task with ID {task_id} not found"
     return str(task)
 
+
 @mcp.tool()
 async def test_tool() -> str:
     """Test function for checking MCP server health."""
     return "Test function is working"
+
 
 @mcp.tool()
 async def list_tasks() -> str:
     """Returns a list of all tasks in the tree (including subtasks)."""
     return str(db.tree)
 
+
 if __name__ == "__main__":
-    mcp.run(transport='stdio')
+    mcp.run(transport="stdio")

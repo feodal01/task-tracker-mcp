@@ -11,10 +11,11 @@ class TaskStatus(str, Enum):
     """
     Enum representing the status of a task.
     """
-    TODO        = "todo"
+
+    TODO = "todo"
     IN_PROGRESS = "in_progress"
-    DONE        = "done"
-    CANCELLED   = "cancelled"
+    DONE = "done"
+    CANCELLED = "cancelled"
 
 
 class CreateTaskParams(BaseModel):
@@ -29,19 +30,27 @@ class UpdateTaskParams(BaseModel):
     task_id: str = Field(..., description="ID of the task to update")
     description: str = Field(None, description="New description for the task")
     dod: Optional[str] = Field(None, description="New Definition of Done for the task")
-    deadline: Optional[datetime] = Field(None, description="New deadline for the task (ISO8601 datetime)")
+    deadline: Optional[datetime] = Field(
+        None, description="New deadline for the task (ISO8601 datetime)"
+    )
     assignee: Optional[str] = Field(None, description="New assignee for the task")
 
 
 class UpdateStatusParams(BaseModel):
     task_id: str = Field(..., description="ID of the task to update status")
-    status: Literal["todo", "in_progress", "done", "cancelled"] = Field(..., description="New status for the task")
-    reason: Optional[str] = Field(None, description="Reason for status change (optional)")
+    status: Literal["todo", "in_progress", "done", "cancelled"] = Field(
+        ..., description="New status for the task"
+    )
+    reason: Optional[str] = Field(
+        None, description="Reason for status change (optional)"
+    )
 
 
 class CloseTaskParams(BaseModel):
     task_id: str = Field(..., description="ID of the task to close")
-    status: Literal["done", "cancelled"] = Field(..., description="Status to set for the task (done or cancelled)")
+    status: Literal["done", "cancelled"] = Field(
+        ..., description="Status to set for the task (done or cancelled)"
+    )
     reason: Optional[str] = Field(None, description="Reason for closing the task")
 
 

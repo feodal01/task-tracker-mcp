@@ -7,7 +7,9 @@ from task_tracker.schemas import TaskStatus
 from task_tracker.tasks import Task
 from task_tracker.tree import TaskTree
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +19,9 @@ class BaseDatabase(ABC):
     """
 
     @abstractmethod
-    async def create_task(self, parent_id: str, description: str, dod: str, **kwargs) -> str:
+    async def create_task(
+        self, parent_id: str, description: str, dod: str, **kwargs
+    ) -> str:
         """
         Create a new task in the specified tree.
         """
@@ -49,6 +53,7 @@ class InMemoryDatabase(BaseDatabase):
     """
     In-memory implementation of the task database. Stores all tasks in a single tree.
     """
+
     def __init__(self):
         """
         Initialize the in-memory database with a single root task tree.
@@ -57,11 +62,7 @@ class InMemoryDatabase(BaseDatabase):
         self.tree = TaskTree(root_task)
 
     async def create_task(
-            self,
-            parent_id: str,
-            description: str,
-            dod: str,
-            **kwargs
+        self, parent_id: str, description: str, dod: str, **kwargs
     ) -> str:
         """
         Create a new subtask under the specified parent task.
@@ -84,7 +85,9 @@ class InMemoryDatabase(BaseDatabase):
         if not parent:
             logger.error(f"Parent task {parent_id} not found in tree")
             raise KeyError(f"Parent task {parent_id} not found in tree")
-        task = self.tree.add_subtask(parent_id, description, dod, kwargs.get("deadline"), kwargs.get("assignee"))
+        task = self.tree.add_subtask(
+            parent_id, description, dod, kwargs.get("deadline"), kwargs.get("assignee")
+        )
         logger.info(f"Task {task.id} created under parent {parent_id}: {description}")
         return task.id
 
@@ -128,6 +131,7 @@ class InMemoryDatabase(BaseDatabase):
         # Convert status to Enum if passed as string
         if "status" in kwargs and isinstance(kwargs["status"], str):
             from task_tracker.schemas import TaskStatus
+
             kwargs["status"] = TaskStatus(kwargs["status"])
         self.tree.update(task_id, **kwargs)
         logger.info(f"Task {task_id} updated with {kwargs}")
