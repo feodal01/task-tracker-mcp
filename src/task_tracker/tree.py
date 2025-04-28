@@ -45,7 +45,9 @@ class TaskTree:
         """
         return self._index.get(task_id)
 
-    def add_subtask(self, parent_id: str, desc: str, dod: str, deadline = None, assignee = None) -> Optional[Task]:
+    def add_subtask(
+        self, parent_id: str, desc: str, dod: str, deadline=None, assignee=None
+    ) -> Optional[Task]:
         """
         Add a subtask to a specific parent task.
 

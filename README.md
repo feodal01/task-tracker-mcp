@@ -8,7 +8,7 @@ Enable LLM agents to manage their tasks through a unified Task manager.
 
 ## Requirements
 - Python 3.13 or higher
-- Node.js and npm
+- Node.js and npm (for @modelcontextprotocol/inspector)
 
 ## Installation
 
@@ -55,7 +55,7 @@ Add the following:
         "run",
         "python",
         "-m",
-        "mcp_server.main"
+        "mcp_server.mcp_service"
       ],
       "env": {
         "PYTHONPATH": "/Path/to/task-tracker-mcp/src"
@@ -72,7 +72,7 @@ Add the following:
 **Using uv:**
 ```bash
 uv pip install -r requirements.txt
-uv python -m src.mcp_server.main
+uv python -m src.mcp_server.mcp_service
 ```
 
 ### Starting the Inspector
@@ -81,12 +81,12 @@ To inspect the MCP server, use:
 **pipenv:**
 ```bash
 export PYTHONPATH=src
-npx @modelcontextprotocol/inspector pipenv run python -m src.mcp_server.main
+npx @modelcontextprotocol/inspector pipenv run python -m src.mcp_server.mcp_service
 ```
 
 **uv:**
 ```bash
-npx @modelcontextprotocol/inspector uv --directory /Path/to/task-tracker-mcp run python -m mcp_server.main 
+npx @modelcontextprotocol/inspector uv --directory /Path/to/task-tracker-mcp run python -m mcp_server.mcp_service 
 ```
 
 ## Running Tests

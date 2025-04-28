@@ -11,12 +11,13 @@ class Task:
     """
     Represents a task in the task tree, supporting subtasks, status, deadlines, assignee, and serialization.
     """
+
     description: str
     dod: str
     status: TaskStatus = TaskStatus.TODO
     id: str = field(default_factory=lambda: str(uuid4()))
-    parent: Optional['Task'] = field(default=None, repr=False)
-    subtasks: List['Task'] = field(default_factory=list, repr=False)
+    parent: Optional["Task"] = field(default=None, repr=False)
+    subtasks: List["Task"] = field(default_factory=list, repr=False)
     close_reason: Optional[str] = None
     deadline: datetime | None = None
     assignee: str | None = None
@@ -24,7 +25,13 @@ class Task:
     # ------------------------------------------------------------------ #
     #  💬  Работа c деревом
     # ------------------------------------------------------------------ #
-    def add_subtask(self, description: str, dod: str, deadline: datetime | None = None, assignee: str | None = None) -> 'Task':
+    def add_subtask(
+        self,
+        description: str,
+        dod: str,
+        deadline: datetime | None = None,
+        assignee: str | None = None,
+    ) -> "Task":
         """
         Add a subtask to this task.
 
@@ -37,11 +44,13 @@ class Task:
         Returns:
             Task: The created subtask.
         """
-        child = Task(description, dod, parent=self, deadline=deadline, assignee=assignee)
+        child = Task(
+            description, dod, parent=self, deadline=deadline, assignee=assignee
+        )
         self.subtasks.append(child)
         return child
 
-    def find(self, task_id: str) -> Optional['Task']:
+    def find(self, task_id: str) -> Optional["Task"]:
         """
         Recursively search for a task by its ID in the subtree rooted at this task.
 
@@ -111,11 +120,11 @@ class Task:
             "close_reason": self.close_reason,
             "subtasks": [st.to_dict() for st in self.subtasks],
             "deadline": self.deadline,
-            "assignee": self.assignee
+            "assignee": self.assignee,
         }
 
     @staticmethod
-    def from_dict(data: dict, parent: 'Task' = None) -> 'Task':
+    def from_dict(data: dict, parent: "Task" = None) -> "Task":
         """
         Deserialize a task (and its subtasks) from a dictionary.
 
@@ -133,10 +142,12 @@ class Task:
             id=data["id"],
             parent=parent,
             close_reason=data.get("close_reason"),
-            deadline=data.get('deadline'),
-            assignee=data.get('assignee')
+            deadline=data.get("deadline"),
+            assignee=data.get("assignee"),
         )
-        task.subtasks = [Task.from_dict(sd, parent=task) for sd in data.get("subtasks", [])]
+        task.subtasks = [
+            Task.from_dict(sd, parent=task) for sd in data.get("subtasks", [])
+        ]
         return task
 
     # ------------------------------------------------------------------ #
@@ -158,6 +169,8 @@ class Task:
         head += f" – DoD: {self.dod}{reason}"
         head += f" – Deadline: {self.deadline}"
         head += f" – Assignee: {self.assignee}"
+        head += f" – Status: {self.status}"
+        head += f" – Close reason: {self.close_reason}"
         lines = [head]
         for st in self.subtasks:
             lines.append(st.__str__(level + 1))

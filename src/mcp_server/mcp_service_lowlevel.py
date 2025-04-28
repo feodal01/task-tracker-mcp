@@ -9,8 +9,12 @@ from mcp.server.models import InitializationOptions
 
 from task_tracker.database import InMemoryDatabase
 from task_tracker.schemas import (
-    TaskStatus, CreateTaskParams, UpdateTaskParams,
-    UpdateStatusParams, DeleteTaskParams, GetTaskParams
+    TaskStatus,
+    CreateTaskParams,
+    UpdateTaskParams,
+    UpdateStatusParams,
+    DeleteTaskParams,
+    GetTaskParams,
 )
 
 app = Server("task-tracker-mcp-lowlevel")
@@ -22,11 +26,7 @@ UPDATE_TASK_SCHEMA = UpdateTaskParams.model_json_schema()
 UPDATE_STATUS_SCHEMA = UpdateStatusParams.model_json_schema()
 DELETE_TASK_SCHEMA = DeleteTaskParams.model_json_schema()
 GET_TASK_SCHEMA = GetTaskParams.model_json_schema()
-EMPTY_SCHEMA = {
-    "type": "object",
-    "properties": {},
-    "required": []
-}
+EMPTY_SCHEMA = {"type": "object", "properties": {}, "required": []}
 
 
 async def create_task_lowlevel(**kwargs):
@@ -39,11 +39,18 @@ async def create_task_lowlevel(**kwargs):
             except Exception:
                 deadline = None
         parent_id = params.parent_id or db.tree.root.id
-        task_id = await db.create_task(parent_id, params.description, params.dod, deadline=deadline, assignee=params.assignee)
+        task_id = await db.create_task(
+            parent_id,
+            params.description,
+            params.dod,
+            deadline=deadline,
+            assignee=params.assignee,
+        )
         result = f"Task created with ID: {task_id}"
         return [types.TextContent(type="text", text=result)]
     except Exception as error:
         return [types.TextContent(type="text", text=f"Error: {str(error)}")]
+
 
 async def update_task_lowlevel(**kwargs):
     try:
@@ -66,18 +73,18 @@ async def update_task_lowlevel(**kwargs):
     except Exception as error:
         return [types.TextContent(type="text", text=f"Error: {str(error)}")]
 
+
 async def update_status_lowlevel(**kwargs):
     try:
         params = UpdateStatusParams(**kwargs)
         await db.update_task(
-            params.task_id,
-            status=TaskStatus(params.status),
-            close_reason=params.reason
+            params.task_id, status=TaskStatus(params.status), close_reason=params.reason
         )
         result = f"Task {params.task_id} status updated to {params.status}"
         return [types.TextContent(type="text", text=result)]
     except Exception as error:
         return [types.TextContent(type="text", text=f"Error: {str(error)}")]
+
 
 async def delete_task_lowlevel(**kwargs):
     try:
@@ -88,6 +95,7 @@ async def delete_task_lowlevel(**kwargs):
     except Exception as error:
         return [types.TextContent(type="text", text=f"Error: {str(error)}")]
 
+
 async def get_task_lowlevel(**kwargs):
     try:
         params = GetTaskParams(**kwargs)
@@ -96,6 +104,7 @@ async def get_task_lowlevel(**kwargs):
         return [types.TextContent(type="text", text=result)]
     except Exception as error:
         return [types.TextContent(type="text", text=f"Error: {str(error)}")]
+
 
 async def list_tasks_lowlevel():
     try:
@@ -166,17 +175,6 @@ async def list_tools() -> list[types.Tool]:
     ]
 
 
-# async def run_server():
-#     from mcp.server.stdio import stdio_server
-#
-#     async with stdio_server() as streams:
-#         await app.run(
-#             streams[0], streams[1], app.create_initialization_options()
-#         )
-#
-#
-# if __name__ == "__main__":
-#     asyncio.run(run_server())
 
 async def run():
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
