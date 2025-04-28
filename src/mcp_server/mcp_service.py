@@ -1,12 +1,10 @@
 import logging
 from datetime import datetime
-from typing import Optional, Union
 
 from mcp.server.fastmcp import FastMCP
 
 from task_tracker.database import InMemoryDatabase
 from task_tracker.schemas import TaskStatus
-
 
 MCP_SERVER_NAME = "task-tracker-mcp"
 

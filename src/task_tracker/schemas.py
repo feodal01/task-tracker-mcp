@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Literal, List, Union, Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TaskStatus(str, Enum):
@@ -17,111 +17,37 @@ class TaskStatus(str, Enum):
     CANCELLED   = "cancelled"
 
 
+class CreateTaskParams(BaseModel):
+    description: str = Field(..., description="Task description")
+    dod: str = Field(..., description="Definition of Done for the task")
+    deadline: datetime = Field(None, description="Task deadline (ISO8601 datetime)")
+    assignee: str = Field(None, description="Assignee of the task")
+    parent_id: str = Field(None, description="Parent task ID (for subtasks)")
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Pydantic-модели для structured output — именно то, что LLM возвращает
-# ─────────────────────────────────────────────────────────────────────────────
-class CreateTaskAction(BaseModel):
-    """
-    Action for creating a new task.
-    """
-    action: Literal["create_task"]
-    description: str
-    dod: str
-    deadline: datetime = None
-    assignee: str = None
 
-class AddSubtaskAction(BaseModel):
-    """
-    Action for adding a subtask to an existing task.
-    """
-    action: Literal["add_subtask"]
-    parent_id: str
-    description: str
-    dod: str
-    deadline: datetime = None
-    assignee: str = None
+class UpdateTaskParams(BaseModel):
+    task_id: str = Field(..., description="ID of the task to update")
+    description: str = Field(None, description="New description for the task")
+    dod: Optional[str] = Field(None, description="New Definition of Done for the task")
+    deadline: Optional[datetime] = Field(None, description="New deadline for the task (ISO8601 datetime)")
+    assignee: Optional[str] = Field(None, description="New assignee for the task")
 
-class UpdateTaskAction(BaseModel):
-    """
-    Action for updating an existing task.
-    """
-    action: Literal["update_task"]
-    task_id: str
-    new_description: Optional[str] = None
-    new_dod: Optional[str] = None
 
-class CloseTaskAction(BaseModel):
-    """
-    Action for closing a task (done or cancelled).
-    """
-    action: Literal["close_task"]
-    task_id: str
-    status: Literal["done", "cancelled"]
-    reason: Optional[str] = None
+class UpdateStatusParams(BaseModel):
+    task_id: str = Field(..., description="ID of the task to update status")
+    status: Literal["todo", "in_progress", "done", "cancelled"] = Field(..., description="New status for the task")
+    reason: Optional[str] = Field(None, description="Reason for status change (optional)")
 
-class DeleteTaskAction(BaseModel):
-    """
-    Action for deleting a task.
-    """
-    action: Literal["delete_task"]
-    task_id: str
 
-class GetTaskAction(BaseModel):
-    """
-    Action for retrieving a task by its ID.
-    """
-    action: Literal["get_task"]
-    task_id: str
+class CloseTaskParams(BaseModel):
+    task_id: str = Field(..., description="ID of the task to close")
+    status: Literal["done", "cancelled"] = Field(..., description="Status to set for the task (done or cancelled)")
+    reason: Optional[str] = Field(None, description="Reason for closing the task")
 
-class ListTasksAction(BaseModel):
-    """
-    Action for listing all tasks.
-    """
-    action: Literal["list_tasks"]
 
-class FinishAction(BaseModel):
-    """
-    Action for finishing the workflow with a result message.
-    """
-    action: Literal["finish"]
-    result_message: str
+class DeleteTaskParams(BaseModel):
+    task_id: str = Field(..., description="ID of the task to delete")
 
-class SearchDuplicates(BaseModel):
-    """
-    Action for fuzzy searching for duplicate tasks.
-    """
-    action: Literal["fuzzy_search"]
-    query: str
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Общая схема — Union всех возможных действий
-# ─────────────────────────────────────────────────────────────────────────────
-ActionRequest = Union[
-    CreateTaskAction,
-    AddSubtaskAction,
-    UpdateTaskAction,
-    CloseTaskAction,
-    DeleteTaskAction,
-    GetTaskAction,
-    ListTasksAction,
-    FinishAction,
-]
-"""
-Type alias for all possible action requests that can be sent to the system.
-"""
-
-class NextAction(BaseModel):
-    """
-    Model representing the next action to be taken, with reasoning and action details.
-    """
-    reasoning: str
-    action: ActionRequest
-
-class Duplicates(BaseModel):
-    """
-    Model representing the result of a duplicate search.
-    """
-    reasoning: str
-    is_duplicate: bool
-    similar_tasks: List[str]
+class GetTaskParams(BaseModel):
+    task_id: str = Field(..., description="ID of the task to retrieve")
