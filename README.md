@@ -14,29 +14,11 @@ Enable LLM agents to manage their tasks through a unified Task manager.
 
 ### Cloning the Repository
 ```bash
-git clone https://github.com/your_username/task-tracker-mcp.git
+git clone git@github.com:feodal01/task-tracker-mcp.git
 cd task-tracker-mcp
 ```
 
 ### Setting Up the Environment
-
-#### Using uv (Recommended)
-
-1. Install [uv](https://github.com/astral-sh/uv):
-   ```bash
-   pip install uv
-   ```
-2. Install requirements:
-   ```bash
-   uv pip install -r requirements.txt
-   ```
-
-#### Using Pipenv
-Create a virtual environment and install dependencies:
-```bash
-pipenv install
-pipenv shell
-```
 
 ## Configuration
 Open the Claude Desktop configuration file located at:
@@ -71,19 +53,12 @@ Add the following:
 
 **Using uv:**
 ```bash
-uv pip install -r requirements.txt
-uv python -m src.mcp_server.mcp_service
+export PYTHONPATH=/Path/to/task-tracker-mcp/src
+uv run python -m src.mcp_server.mcp_service
 ```
 
 ### Starting the Inspector
 To inspect the MCP server, use:
-
-**pipenv:**
-```bash
-export PYTHONPATH=src
-npx @modelcontextprotocol/inspector pipenv run python -m src.mcp_server.mcp_service
-```
-
 **uv:**
 ```bash
 npx @modelcontextprotocol/inspector uv --directory /Path/to/task-tracker-mcp run python -m mcp_server.mcp_service 
@@ -93,15 +68,15 @@ npx @modelcontextprotocol/inspector uv --directory /Path/to/task-tracker-mcp run
 
 **uv:**
 ```bash
-uv pip install -r requirements.txt
-export PYTHONPATH=src
-uv pytest tests/
+export PYTHONPATH=/Path/to/task-tracker-mcp/src
+uv run pytest tests/
 ```
 
-**pipenv:**
+## Running FastApi service with MCP tools
+
 ```bash
-export PYTHONPATH=src
-pytest tests/test_database.py
+export PYTHONPATH=/Path/to/task-tracker-mcp/src
+uv --directory /Path/to/task-tracker-mcp run python -m mcp_server.mcp_rest_service
 ```
 
 ## License
