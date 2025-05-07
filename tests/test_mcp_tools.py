@@ -53,8 +53,6 @@ async def test_update_task():
         task_id=task_id,
         description="Updated desc",
         dod="Updated DoD",
-        status="done",
-        close_reason=None,
         deadline=None,
         assignee="user1"
     )
@@ -73,7 +71,7 @@ async def test_close_task():
         parent_id=None
     )
     task_id = create_result.split(": ")[-1]
-    close_result = await mcp_service.close_task(
+    close_result = await mcp_service.update_status(
         task_id=task_id,
         status="done",
         reason="Completed"
