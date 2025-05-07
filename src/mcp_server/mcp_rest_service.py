@@ -19,9 +19,9 @@ async def lifespan(app: FastAPI):
             "run",
             "python",
             "-m",
-            "mcp_server.mcp_service_lowlevel"
+            "mcp_server.mcp_service_lowlevel",
         ],
-        env={"PYTHONPATH": project_root}
+        env={"PYTHONPATH": project_root},
     )
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as mcp_session:
@@ -33,7 +33,9 @@ async def lifespan(app: FastAPI):
             finally:
                 pass
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 @app.post("/call_tool")
 async def call_tool_endpoint(request: Request):
@@ -42,6 +44,10 @@ async def call_tool_endpoint(request: Request):
     result = await handle_llm_tool_call(llm_json, mcp_session)
     return {"result": result}
 
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("mcp_server.mcp_rest_service:app", host="0.0.0.0", port=8000, reload=True)
+
+    uvicorn.run(
+        "mcp_server.mcp_rest_service:app", host="0.0.0.0", port=8000, reload=True
+    )
