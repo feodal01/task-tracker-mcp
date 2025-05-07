@@ -1,6 +1,5 @@
 import json
-from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 from task_tracker.schemas import TaskStatus
 from task_tracker.tasks import Task
@@ -12,7 +11,7 @@ class TaskTree:
     and provides serialization/deserialization to and from JSON.
     """
 
-    # ────────────────────────── init & индекс ───────────────────────── #
+    # ────────────────────────── init & index ────────────────────────── #
     def __init__(self, root: Task):
         """
         Initialize the task tree with a root task.
@@ -32,7 +31,7 @@ class TaskTree:
         for st in node.subtasks:
             self._rebuild_index(st)
 
-    # ─────────────────────────── базовое API ────────────────────────── #
+    # ─────────────────────────── base API ───────────────────────────── #
     def get(self, task_id: str) -> Optional[Task]:
         """
         Get a task by its id.
@@ -84,7 +83,7 @@ class TaskTree:
         if task:
             task.close(status, reason)
 
-    # ───────────────────────  🔄  update по id  ─────────────────────── #
+    # ───────────────────────  🔄  update by id  ─────────────────────── #
     def update(self, task_id: str, **kwargs):
         """
         Update task parameters by its ID. All parameters are optional and passed as keyword arguments.
@@ -104,7 +103,7 @@ class TaskTree:
         self._index.clear()
         self._rebuild_index(self.root)
 
-    # ─────────────────── JSON сериализация / I/O ────────────────────── #
+    # ─────────────────── JSON serialization / I/O ───────────────────── #
     def to_dict(self) -> dict:
         """
         Get a JSON-ready dict of the entire hierarchy (root).
@@ -138,7 +137,7 @@ class TaskTree:
         with open(path, "w", encoding="utf-8") as f:
             f.write(self.to_json(indent=indent))
 
-    # ------- альтернативные конструкторы (загрузка) ------------------- #
+    # ────────────────── alternative constructors (loading) ───────────── #
     @classmethod
     def from_json(cls, json_str: str) -> "TaskTree":
         """
@@ -182,7 +181,7 @@ class TaskTree:
         root = Task.from_dict(data)
         return cls(root)
 
-    # ───────────────────────── красивая печать ──────────────────────── #
+    # ───────────────────────  👁  pretty print  ─────────────────────── #
     def __str__(self) -> str:
         """
         Return a pretty-printed string representation of the tree.
