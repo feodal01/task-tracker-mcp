@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class TaskStatus(str, Enum):
@@ -60,3 +60,7 @@ class DeleteTaskParams(BaseModel):
 
 class GetTaskParams(BaseModel):
     task_id: str = Field(..., description="ID of the task to retrieve")
+
+
+class Empty(BaseModel):
+    model_config = ConfigDict(extra="forbid")
